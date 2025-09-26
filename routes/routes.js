@@ -1,26 +1,102 @@
-import express from 'express';  // Importing express for the web framework
-import { UserGetController, UserPostController } from '../controllers/controller.js';  // Importing controllers for GET and POST requests
+// routes/routes.js
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
+import { verifyToken } from '../middlewares/authMiddleware.js';
 
-const router = express.Router();  // Creating an instance of express Router for defining routes
-const UserGetControllerInstance = new UserGetController();  // Creating an instance of UserGetController
-const UserPostControllerInstance = new UserPostController();  // Creating an instance of UserPostController
+const router = express.Router();
 
-// GET REQUESTS
+// ------------------- GET Routes -------------------
 
-// Route definitions for GET requests
-router.get('/signup', UserGetControllerInstance.getSignUpPage);  // Route to render sign up page
-router.get('/signin', UserGetControllerInstance.getSignInPage);  // Route to render sign in page
-router.get('/homepage', UserGetControllerInstance.homePage);  // Route to render homepage
-router.get('/signout', UserGetControllerInstance.logoutUser);  // Route to handle user logout
-router.get('/forgot-password', UserGetControllerInstance.getForgotPassword);  // Route to render forgot password page
-router.get('/change-password', UserGetControllerInstance.getChangePassword);  // Route to render change password page
+// Render Sign Up page
+router.get('/signup', (req, res) => {
+    res.render('signup', { message: null });
+});
 
-// POST REQUESTS
+// Render Sign In page
+router.get('/signin', (req, res) => {
+    res.render('signin', { message: null });
+});
 
-// Route definitions for POST requests
-router.post('/signup', UserPostControllerInstance.createUser);  // Route to handle user sign up
-router.post('/signin', UserPostControllerInstance.signInUser);  // Route to handle user sign in
-router.post('/forgot-password', UserPostControllerInstance.forgotPassword);  // Route to handle forgot password
-router.post('/change-password', UserPostControllerInstance.changePassword);  // Route to handle change password
+// Render Homepage (protected)
+router.get('/homepage', verifyToken, async(req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.redirect('/user/signin');
+        res.render('homepage', { username: user.username, email: user.email });
+    } catch (err) {
+        res.redirect('/user/signin');
+    }
+});
 
-export default router;  // Exporting the router instance for use in other parts of the application
+// Logout user
+router.get('/signout', (req, res) => {
+    res.clearCookie('token'); // xóa cookie JWT
+    res.redirect('/user/signin');
+});
+
+// Render Forgot Password page
+router.get('/forgot-password', (req, res) => {
+    res.render('forgot-password', { message: null });
+});
+
+// Render Change Password page
+router.get('/change-password', (req, res) => {
+    res.render('change-password', { message: null });
+});
+
+// ------------------- POST Routes -------------------
+
+// POST /signup
+router.post('/signup', async(req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        const existUser = await User.findOne({ email });
+        if (existUser) return res.render('signup', { message: 'Email already registered' });
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({ username, email, password: hashedPassword });
+        await newUser.save();
+
+        // Chuyển sang trang signin sau khi đăng ký thành công
+        res.redirect('/user/signin');
+    } catch (err) {
+        res.render('signup', { message: err.message });
+    }
+});
+
+// POST /signin
+router.post('/signin', async(req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.render('signin', { message: 'User not found' });
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.render('signin', { message: 'Invalid credentials' });
+
+        // Tạo JWT token 1h
+        const token = jwt.sign({ id: user._id }, 'secretKey', { expiresIn: '1h' });
+
+        // Lưu token vào cookie
+        res.cookie('token', token, { httpOnly: true });
+        res.redirect('/user/homepage');
+    } catch (err) {
+        res.render('signin', { message: err.message });
+    }
+});
+
+// POST /forgot-password
+router.post('/forgot-password', async(req, res) => {
+    // TODO: logic quên mật khẩu
+    res.render('forgot-password', { message: 'Function not implemented yet' });
+});
+
+// POST /change-password
+router.post('/change-password', async(req, res) => {
+    // TODO: logic đổi mật khẩu
+    res.render('change-password', { message: 'Function not implemented yet' });
+});
+
+export default router;

@@ -1,15 +1,40 @@
-import mongoose from 'mongoose';  // Importing mongoose for MongoDB interactions
+// models/User.js
+import mongoose from 'mongoose'; // Import mongoose để tạo schema và model
 
-// Defining the schema for the User model
+// -----------------------------
+// Định nghĩa Schema cho User
+// -----------------------------
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true }, // Field for username, must be a string and required
-  email: { type: String, required: true, unique: true }, // Field for email, must be a string, required, and unique
-  password: { type: String, required: true }, // Field for password, must be a string and required
-
+    username: {
+        type: String,
+        required: [true, "Username is required"], // Bắt buộc phải có
+        trim: true, // Tự động loại bỏ khoảng trắng đầu/cuối
+    },
+    email: {
+        type: String,
+        required: [true, "Email is required"],
+        unique: true, // Không được trùng
+        lowercase: true, // Chuyển email về chữ thường
+        trim: true,
+    },
+    password: {
+        type: String,
+        required: [true, "Password is required"],
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now // Lưu thời gian tạo user
+    }
+}, {
+    timestamps: true, // Tạo tự động createdAt và updatedAt
 });
 
-// Creating the User model based on the schema
-const User = mongoose.model("User", userSchema);
+// -----------------------------
+// Tạo Model dựa trên schema
+// -----------------------------
+const User = mongoose.model('User', userSchema);
 
-export default User; // Exporting the User model
-
+// -----------------------------
+// Export Model để dùng ở nơi khác
+// -----------------------------
+export default User;
