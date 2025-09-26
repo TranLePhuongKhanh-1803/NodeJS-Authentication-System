@@ -106,3 +106,14 @@ This project was created by [Ravikant Singh](https://github.com/ravikantsingh12)
 ## Follow me on
 
 - [LinkedIn](https://www.linkedin.com/in/ravikant-singh-327a98241)
+##  signup
+![Test](./public/results/signup.png)
+
+## signin
+![Test](./public/results/signin.png)
+## sigout
+![Test](./public/results/sigout.png)
+## changepass
+![Test](./public/results/changepass.png)
+## Mongo 
+![Test](./public/results/mongo.png)
