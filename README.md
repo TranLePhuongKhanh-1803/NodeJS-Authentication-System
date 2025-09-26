@@ -73,7 +73,7 @@ Follow these steps to run the project locally:
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/your-username/nodejs-authentication-system.git
+   https://github.com/TranLePhuongKhanh-1803/NodeJS-Authentication-Systemgit clone https://github.com/your-username/nodejs-authentication-system.git
   
 2. Navigate into the project directory:
    ```bash
