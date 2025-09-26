@@ -111,7 +111,7 @@ This project was created by [Ravikant Singh](https://github.com/ravikantsingh12)
 
 ## signin
 ![Test](./public/results/signin.png)
-## sigout
+## sigout khi đăng xuất trả về trang đăng nhập 
 ![Test](./public/results/sigout.png)
 ## changepass
 ![Test](./public/results/changepass.png)
